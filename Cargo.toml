@@ -1,0 +1,17 @@
+[package]
+name = "archiver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.7", features = ["derive"] }
+color-print = "0.3.6"
+futures-util = "0.3.30"
+langchain-rust = { version = "4.2.0", features = ["ollama", "ollama-rs", "qdrant", "qdrant-client", "surrealdb"] }
+llm-chain = {path = "/Users/bear/lab/llm-chain/crates/llm-chain"}
+llm-chain-openai = {path = "/Users/bear/lab/llm-chain/crates/llm-chain-openai"}
+ollama-rs = { version = "0.2.0", features = ["stream"] }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+surrealdb = { version = "1.5.3", features = ["kv-mem"] }
+tokio = { version = "1.38.0", features = ["full"] }
