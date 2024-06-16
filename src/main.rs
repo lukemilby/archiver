@@ -25,6 +25,10 @@ use langchain_rust::{
 use std::io::{stdin, stdout, Write};
 use std::path::PathBuf;
 
+fn indexer(store, file_path) {
+    
+}
+
 #[derive(Debug, Parser)]
 struct Archiver {
     /// Index file or directory
@@ -58,12 +62,12 @@ async fn main() {
     let db = surrealdb::engine::any::connect((database_url, surrealdb_config))
         .await
         .unwrap();
-    db.query("DEFINE NAMESPACE test;")
+    db.query("DEFINE NAMESPACE archiver;")
         .await
         .unwrap()
         .check()
         .unwrap();
-    db.query("USE NAMESPACE test; DEFINE DATABASE test;")
+    db.query("USE NAMESPACE archiver; DEFINE DATABASE archiver;")
         .await
         .unwrap()
         .check()
