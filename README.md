@@ -20,6 +20,14 @@ Before setting up Archiver, ensure you have the following installed on your syst
 - SurrealDB
 - `just` (command runner)
 
+## Install Archiver
+
+1. **Install using Cargo**:
+    ```bash
+    cargo install archiver
+    ```
+    Make sure you have SurrealDB setup and Ollama before running Archiver
+
 ## Setup
 
 
@@ -74,10 +82,6 @@ Archiver once.
     cd archiver
     just db_dev # run in a seperate terminal
     just run
-    ```
-2. **Install using Cargo**:
-    ```bash
-    cargo install archiver
     ```
 
 ## License
