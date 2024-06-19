@@ -30,8 +30,12 @@ Before setting up Archiver, ensure you have the following installed on your syst
     brew install ollama
     ```
 
-2. **Configure Ollama**:
-    - Follow the [Ollama documentation](https://ollama.dev/docs) to set up your API keys and configuration files.
+### Just
+
+1. **Install Just**:
+    ```bash
+    cargo install just
+    ```
 
 ### SurrealDB
 
@@ -45,28 +49,35 @@ Before setting up Archiver, ensure you have the following installed on your syst
     just db_dev
     ```
 
+### Setting up SurrealDB
+
 Once Surreal is up and running you can use https://surrealist.app/ to access the instance of Surreal. 
 But before doing that a Namespace and Table need to be setup. Fastest way to get this done is to run
 Archiver once. 
 
-```bash
-just run
-```
+1. **Set Namespace and Table**:
+    ```bash
+    just run
+    ```
+
+2. **Add Markdown File to the SurrealDB**: 
+    ```bash
+    cargo run -- -a <markdownfile>
+    ```
     
 
 ### Archiver
 
-1. **Clone the Repository**:
+1. **Setup from Source**:
     ```bash
     git clone https://github.com/yourusername/archiver.git
     cd archiver
     just db_dev # run in a seperate terminal
     just run
     ```
-
-3. **Add Markdown File to the SurrealDB**: 
+2. **Install using Cargo**:
     ```bash
-    cargo run -- -a <markdownfile>
+    cargo install archiver
     ```
 
 ## License
