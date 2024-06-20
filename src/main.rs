@@ -83,7 +83,8 @@ async fn main() -> Result<()> {
     // DB object that creats a new namesapce called archiver and defines a table called archiver
     let db = surrealdb::engine::any::connect((database_url, surrealdb_config))
         .await
-        .unwrap();
+        .expect("Unable to conntection to surreal");
+
     db.query("DEFINE NAMESPACE archiver;")
         .await
         .unwrap()
@@ -148,6 +149,7 @@ async fn main() -> Result<()> {
     // INPUT Loop
     loop {
         // Terminal interaction
+        print!(":>");
         let mut question = String::new();
         stdin()
             .read_line(&mut question)
