@@ -4,7 +4,9 @@ use clap::Parser;
 use color_print::cprint;
 use futures_util::StreamExt;
 use langchain_rust::{
-    chain::{builder::ConversationalChainBuilder, Chain},
+    add_documents,
+    chain::{builder::ConversationalChainBuilder, Chain, ConversationalRetrieverChainBuilder},
+
     // schemas::Message,
     // template_fstring,
     // Document Loader
@@ -12,17 +14,23 @@ use langchain_rust::{
     // Embedding
     embedding::{embedder_trait::Embedder, ollama::ollama_embedder::OllamaEmbedder},
 
+    fmt_message,
+    fmt_template,
     llm::client::Ollama,
     // fmt_message, fmt_template,
     memory::SimpleMemory,
+    message_formatter,
+    prompt::HumanMessagePromptTemplate,
     // message_formatter,
     // prompt::HumanMessagePromptTemplate,
     prompt_args,
+    schemas::{Document, Message},
+    template_fstring,
     //Vector Store
-    schemas::Document,
+    template_jinja2,
     vectorstore::{
         surrealdb::{Store, StoreBuilder},
-        VecStoreOptions, VectorStore,
+        Retriever, VecStoreOptions, VectorStore,
     },
 };
 use std::fs::metadata;
@@ -115,63 +123,71 @@ async fn main() -> Result<()> {
 
     // Add file to vectordb
     if let Some(doc) = args.archive {
-        let docs = file_to_doc(doc).await.unwrap();
+        let documents = file_to_doc(doc).await.unwrap();
 
-        store
-            .add_documents(&docs, &VecStoreOptions::default())
-            .await
-            .unwrap();
+        let _ = add_documents!(store, &documents).await.map_err(|e| {
+            println!("Error adding documents: {:?}", e);
+        });
         process::exit(1);
     };
+    // Prompt
+    let prompt= message_formatter![
+                    fmt_message!(Message::new_system_message("You are a helpful assistant")),
+                    fmt_template!(HumanMessagePromptTemplate::new(
+                    template_jinja2!("
+Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+{{context}}
+
+Question:{{question}}
+Helpful Answer:
+
+        ",
+                    "context","question")))
+
+                ];
 
     // LLM
-    let chain = ConversationalChainBuilder::new()
+    let chain = ConversationalRetrieverChainBuilder::new()
         .llm(llm)
-        //IF YOU WANT TO ADD A CUSTOM PROMPT YOU CAN UN COMMENT THIS:
-        //         .prompt(message_formatter![
-        //             fmt_message!(Message::new_system_message("You are a helpful assistant")),
-        //             fmt_template!(HumanMessagePromptTemplate::new(
-        //             template_fstring!("
-        // The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
-        //
-        // Current conversation:
-        // {history}
-        // Human: {input}
-        // AI:
-        // ",
-        //             "input","history")))
-        //
-        //         ])
+        .rephrase_question(true)
+        .prompt(prompt)
+        .retriever(Retriever::new(store, 5))
         .memory(memory.into())
         .build()
-        .expect("Error building ConversationalChain");
+        .expect("Error building Retriever Chain");
 
     // INPUT Loop
+    // Where the interactions with the LLM are all put together
     loop {
         // Terminal interaction
-        print!(":>");
+        print!("|[●▪▪●]|> ");
+        let _ = stdout().flush();
         let mut question = String::new();
         stdin()
             .read_line(&mut question)
             .expect("Failed to read line");
 
         // Fetch RAG results from SurrealDB
-        let results = store
-            .similarity_search(
-                &mut question,
-                2,
-                &VecStoreOptions::default().with_score_threshold(0.3),
-            )
-            .await
-            .unwrap();
+        // COMMMENTED for retriever llm chain upgrade. Documents should be queried from the LLM Chain vs manually here
+        // let results = store
+        //     .similarity_search(
+        //         &mut question,
+        //         2,
+        //         &VecStoreOptions::default().with_score_threshold(0.4),
+        //     )
+        //     .await
+        //     .expect("Error with fetching docs with Surreal or Ollama");
 
         // Append content from RAG results
-        results.iter().for_each(|r| {
-            question.push_str(&r.page_content);
-        });
+        // results.iter().for_each(|r| {
+        //     question.push_str(&r.page_content);
+        // });
 
+        // LLM Chain
+        // How would I use this?
         let input_variables = prompt_args! {
-            "input" => question,
+            "question" => question,
         };
 
         // Setup stream
