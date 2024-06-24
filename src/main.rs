@@ -6,28 +6,24 @@ use futures_util::StreamExt;
 use langchain_rust::{
     add_documents,
     chain::{builder::ConversationalChainBuilder, Chain, ConversationalRetrieverChainBuilder},
-
     // schemas::Message,
     // template_fstring,
     // Document Loader
     document_loaders::{InputFormat, Loader, PandocLoader},
     // Embedding
     embedding::{embedder_trait::Embedder, ollama::ollama_embedder::OllamaEmbedder},
-
     fmt_message,
     fmt_template,
     llm::client::Ollama,
-    // fmt_message, fmt_template,
     memory::SimpleMemory,
     message_formatter,
     prompt::HumanMessagePromptTemplate,
-    // message_formatter,
-    // prompt::HumanMessagePromptTemplate,
     prompt_args,
     schemas::{Document, Message},
     template_fstring,
     //Vector Store
     template_jinja2,
+    text_splitter::{MarkdownSplitter, SplitterOptions, TextSplitter},
     vectorstore::{
         surrealdb::{Store, StoreBuilder},
         Retriever, VecStoreOptions, VectorStore,
@@ -41,6 +37,16 @@ use std::{
     io::{stdin, stdout, Write},
 };
 
+// Document Chunker
+async fn chunk(docs: &Vec<Document>) -> Result<Vec<Document>> {
+    let options = SplitterOptions::default();
+    let md_splitter = MarkdownSplitter::new(options);
+    let docs = md_splitter.split_documents(&docs).await?;
+    println!("{:?}", docs.len());
+    Ok(docs)
+}
+
+// Document Loader
 async fn file_to_doc(file_path: PathBuf) -> Result<Vec<Document>> {
     let loader = PandocLoader::from_path(InputFormat::Markdown.to_string(), file_path)
         .await
@@ -53,7 +59,10 @@ async fn file_to_doc(file_path: PathBuf) -> Result<Vec<Document>> {
         .map(|d| d.unwrap())
         .collect::<Vec<_>>()
         .await;
-    Ok(docs)
+
+    let chunked_docs = chunk(&docs).await?;
+
+    Ok(chunked_docs)
 }
 
 #[derive(Debug, Parser)]
@@ -130,6 +139,7 @@ async fn main() -> Result<()> {
         });
         process::exit(1);
     };
+
     // Prompt
     let prompt= message_formatter![
                     fmt_message!(Message::new_system_message("You are a helpful assistant")),
