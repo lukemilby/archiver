@@ -176,6 +176,7 @@ name = "archiver"
 version = "0.2.0"
 dependencies = [
  "anyhow",
+ "async-recursion",
  "clap",
  "color-print",
  "futures-util",

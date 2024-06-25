@@ -12,6 +12,7 @@ categories = ["command-line-utilities", "LLM", "Langchain"]
 
 [dependencies]
 anyhow = "1.0.86"
+async-recursion = "1.1.1"
 clap = { version = "4.5.7", features = ["derive"] }
 color-print = "0.3.6"
 futures-util = "0.3.30"
