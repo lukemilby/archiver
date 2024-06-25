@@ -31,6 +31,7 @@ use langchain_rust::{
     },
 };
 use std::process;
+use std::process::{Command, Stdio};
 use std::{collections::HashMap, path::PathBuf};
 use std::{
     error::Error,
@@ -90,6 +91,16 @@ async fn directory_to_docs(file_path: PathBuf) -> Result<Vec<Document>> {
     Ok(docs)
 }
 
+async fn check_pandoc() -> Result<bool> {
+    let status = Command::new("pandoc")
+        .arg("--version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()?;
+
+    Ok(status.success())
+}
+
 #[derive(Debug, Parser)]
 struct Archiver {
     /// Index Markdown file
@@ -116,6 +127,11 @@ async fn main() -> Result<()> {
 
     // use langchain_rust::vectorstore::VecStoreOptions;
     let llm = Ollama::default().with_model(args.model);
+
+    if let Err(e) = check_pandoc().await {
+        eprintln!("Error: Pandoc is not installed or not in PATH: {}", e);
+        std::process::exit(1);
+    }
 
     // Conversational Memory
     let memory = SimpleMemory::new();
