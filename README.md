@@ -4,12 +4,23 @@ Archiver is a command-line application designed to interact with large language 
 It leverages Ollama for model integration and SurrealDB as the vector store. The application uses [Langchain-rust](https://github.com/Abraxas-365/langchain-rust) as the 
 framework for interacting with the Ollama and SurrealDB.
 
-## Features
+## Change Log
 
+#### v0.3.0
+- **Index Directory**: Add Directory Indexing for bulk Markdown file importing
+
+#### v0.2.0
+- **Prompt**: Add prompt identifier and colored response from LLM
+- **Error Handling**: Better error handling with SurrealDB and Ollama
+- **Chuncking**: Added document chunking when adding files to SurrealDB
+- **Mode Switch**: Switched LLM chain to a Conversational Retriever from Conversational, making the LLM more efficient with responses from the VectorDB
+
+#### v0.1.0
 - **Conversational Memory**: Maintain context across interactions with the LLM.
 - **Vector Stores**: Efficient storage and retrieval of high-dimensional vectors through SurrealDB.
 - **Ollama Integration**: Easy setup and use of Ollama for model management.
-- **Indexting Files**: Add markdown files to SurrealDB.
+- **Indexing Files**: Add Markdown files to SurrealDB.
+
 
 ## Prerequisites
 
