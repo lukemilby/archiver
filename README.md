@@ -27,6 +27,7 @@ framework for interacting with the Ollama and SurrealDB.
 Before setting up Archiver, ensure you have the following installed on your system:
 
 - Rust (latest stable version)
+- Pandoc (load text when adding to vector db)
 - Ollama
 - SurrealDB
 - `just` (command runner)
