@@ -1,7 +1,8 @@
 #![allow(unused_imports)]
 use anyhow::{Context, Result};
+use async_recursion::async_recursion;
 use clap::Parser;
-use color_print::cprint;
+use color_print::{cprint, cprintln};
 use futures_util::StreamExt;
 use langchain_rust::{
     add_documents,
@@ -29,20 +30,19 @@ use langchain_rust::{
         Retriever, VecStoreOptions, VectorStore,
     },
 };
-use std::fs::metadata;
-use std::path::PathBuf;
 use std::process;
+use std::{collections::HashMap, path::PathBuf};
 use std::{
     error::Error,
     io::{stdin, stdout, Write},
 };
+use std::{fs, path::Path, str::FromStr};
 
 // Document Chunker
 async fn chunk(docs: &Vec<Document>) -> Result<Vec<Document>> {
     let options = SplitterOptions::default();
     let md_splitter = MarkdownSplitter::new(options);
     let docs = md_splitter.split_documents(&docs).await?;
-    println!("{:?}", docs.len());
     Ok(docs)
 }
 
@@ -65,11 +65,41 @@ async fn file_to_doc(file_path: PathBuf) -> Result<Vec<Document>> {
     Ok(chunked_docs)
 }
 
+// Directory Document loader
+#[async_recursion]
+async fn directory_to_docs(file_path: PathBuf) -> Result<Vec<Document>> {
+    let mut docs: Vec<Document> = Vec::new();
+    for file in fs::read_dir(&file_path)? {
+        let file = file?;
+
+        let metadata = fs::metadata(file.path())?;
+
+        // If sure call recursive dir to doc
+        if metadata.is_dir() {
+            docs.append(directory_to_docs(file.path()).await.unwrap().as_mut());
+        } else if metadata.is_file() {
+            // Check to see if file is markdown and create a document if so
+            if let Some(extension) = Path::new(&file.path()).extension() {
+                if extension == "md" {
+                    cprintln!("[+] added <green>{:?}</green>", &file.path());
+                    docs.append(file_to_doc(file.path()).await.unwrap().as_mut());
+                }
+            }
+        }
+    }
+    Ok(docs)
+}
+
 #[derive(Debug, Parser)]
 struct Archiver {
-    /// Index file, adding directory later
+    /// Index Markdown file
     #[arg(short, long)]
     archive: Option<PathBuf>,
+
+    /// Index Directory of Markdown files
+    #[arg(short, long)]
+    dir: Option<PathBuf>,
+
     /// Model to run from ollama, Default: "mistral"
     #[arg(short, long, default_value_t = String::from("mistral"))]
     model: String,
@@ -139,6 +169,14 @@ async fn main() -> Result<()> {
         });
         process::exit(1);
     };
+
+    if let Some(doc) = args.dir {
+        let documents = directory_to_docs(doc).await.unwrap();
+        let _ = add_documents!(store, &documents).await.map_err(|e| {
+            println!("Error adding documents: {:?}", e);
+        });
+        process::exit(1);
+    }
 
     // Prompt
     let prompt= message_formatter![
