@@ -4,33 +4,64 @@ Archiver is a command-line application designed to interact with large language 
 It leverages Ollama for model integration and SurrealDB as the vector store. The application uses [Langchain-rust](https://github.com/Abraxas-365/langchain-rust) as the 
 framework for interacting with the Ollama and SurrealDB.
 
+## Prerequisites
+
+Before setting up Archiver, ensure you have the following installed on your system:
+
+- Rust (latest stable version)
+- `just` (command runner)
+- Pandoc (load text when adding to vector db)
+- Ollama
+- SurrealDB
+
+
+## Quick Start
+
+Ensure **docker** is running and make sure **docker compose** is setup
+
+```bash
+docker ps
+```
+
+Install Just to run the setup and Pandocs for file indexing to surrealdb
+
+```bash
+brew install pandoc just
+```
+
+Once Pandocs and Just are installed run
+
+```bash
+just docker
+``` 
+
+to setup SurrealDB, Ollama and pull all the dependencies for Ollama
+
 ## Change Log
 
+#### v0.3.2
+- **Quick Start with Docker**: Update to Justfile and Readme to walk through setting up Archiver with docker
+
+#### v0.3.1
+- **Check for Pandoc**: Ensure pandoc exists before running
+
 #### v0.3.0
+
 - **Index Directory**: Add Directory Indexing for bulk Markdown file importing
 
 #### v0.2.0
+
 - **Prompt**: Add prompt identifier and colored response from LLM
 - **Error Handling**: Better error handling with SurrealDB and Ollama
 - **Chuncking**: Added document chunking when adding files to SurrealDB
 - **Mode Switch**: Switched LLM chain to a Conversational Retriever from Conversational, making the LLM more efficient with responses from the VectorDB
 
 #### v0.1.0
+
 - **Conversational Memory**: Maintain context across interactions with the LLM.
 - **Vector Stores**: Efficient storage and retrieval of high-dimensional vectors through SurrealDB.
 - **Ollama Integration**: Easy setup and use of Ollama for model management.
 - **Indexing Files**: Add Markdown files to SurrealDB.
-
-
-## Prerequisites
-
-Before setting up Archiver, ensure you have the following installed on your system:
-
-- Rust (latest stable version)
-- Pandoc (load text when adding to vector db)
-- Ollama
-- SurrealDB
-- `just` (command runner)
 
 ## Install Archiver
 
@@ -40,24 +71,6 @@ Before setting up Archiver, ensure you have the following installed on your syst
     ```
     Make sure you have SurrealDB setup and Ollama before running Archiver
 
-## Setup
-
-
-### Ollama
-
-1. **Install Ollama**:
-    ```bash
-    brew install ollama
-    ```
-
-### Just
-
-1. **Install Just**:
-    ```bash
-    cargo install just
-    ```
-
-### SurrealDB
 
 1. **Download and Install SurrealDB**:
     ```bash
