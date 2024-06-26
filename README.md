@@ -35,6 +35,29 @@ Once Pandocs and Just are installed run
 just docker
 ``` 
 
+Add file to SurrealDB
+
+```bash
+just add <markdown file>
+```
+Or
+
+```bash
+cargo run -- -a <markdown file>
+```
+
+Add directory of Markdown
+
+```bash
+cargo run -- -d <directory>
+```
+
+Finally Run Archiver and use it
+
+```bash
+just run
+```
+
 to setup SurrealDB, Ollama and pull all the dependencies for Ollama
 
 ## Change Log
