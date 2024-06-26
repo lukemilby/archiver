@@ -23,19 +23,19 @@ Ensure **docker** is running and make sure **docker compose** is setup
 docker ps
 ```
 
-Install Just to run the setup and Pandocs for file indexing to surrealdb
+#### Install Just to run the setup and Pandocs for file indexing to surrealdb
 
 ```bash
 brew install pandoc just
 ```
 
-Once Pandocs and Just are installed run
+#### Once Pandocs and Just are installed run
 
 ```bash
 just docker
 ``` 
 
-Add file to SurrealDB
+#### Add file to SurrealDB
 
 ```bash
 just add <markdown file>
@@ -52,7 +52,7 @@ Add directory of Markdown
 cargo run -- -d <directory>
 ```
 
-Finally Run Archiver and use it
+#### Finally Run Archiver and use it
 
 ```bash
 just run
