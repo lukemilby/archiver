@@ -58,8 +58,6 @@ cargo run -- -d <directory>
 just run
 ```
 
-to setup SurrealDB, Ollama and pull all the dependencies for Ollama
-
 ## Change Log
 
 #### v0.3.2
